@@ -2,7 +2,7 @@ import argparse
 import random
 import numpy as np
 import torch
-from sampling import autoregressive_generate, speculative_generate
+from local_sampling import autoregressive_generate, speculative_generate
 from ngram_assisted import OneLevelNGramStorage, NGramStorage, ngram_assisted_speculative_generate
 from utils.logits_processor import GreedyProcessor, MultinomialProcessor, TopKProcessor, NucleusProcessor, TopKNucleusProcessor
 from transformers import (
