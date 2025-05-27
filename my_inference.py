@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     # ---- 基本參數 -----------------------------------------------------
     parser.add_argument("--prompt", type=str, default="給我一些資本主義的創新點子")
-    parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--device", type=str, default="cuda:1")
 
     # ---- drafter 清單 -------------------------------------------------
     parser.add_argument(
@@ -252,7 +252,7 @@ if __name__ == "__main__":
     parser.add_argument("--chat", action="store_false", help="停用 chat template")
 
     # ---- 生成超參 -----------------------------------------------------
-    parser.add_argument("--gen-len", type=int, default=50
+    parser.add_argument("--gen-len", type=int, default=50)
     parser.add_argument("--gamma", type=int, default=8)
 
     # ---- Processor 參數 ---------------------------------------------

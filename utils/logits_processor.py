@@ -59,7 +59,9 @@ class TopKProcessor(MultinomialProcessor):
     def _process(self, logits: Tensor) -> Tensor:
         top_k = min(self.top_k, logits.size(-1))
         indices_to_remove = logits < torch.topk(logits, top_k, dim=-1)[0][..., -1, None]
-        logits[indices_to_remove] = -1e20
+        # logits[indices_to_remove] = -1e20
+        mask_val = torch.finfo(logits.dtype).min
+        logits[indices_to_remove] = mask_val
         return logits
 
 

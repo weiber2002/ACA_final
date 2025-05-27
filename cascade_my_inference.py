@@ -11,7 +11,7 @@ from termcolor import colored
 # ---- 專案本地模組 ------------------------------------------------------
 # from local_sampling import autoregressive_generate, speculative_generate
 from local_sampling import  autoregressive_generate
-from local_sampling.multi_speculative_decoding import multi_draft_speculative_generate
+from local_sampling.cascade_speculative_decoding import multi_draft_speculative_generate
 from utils.logits_processor import (
     GreedyProcessor,
     MultinomialProcessor,
@@ -46,6 +46,7 @@ class InferenceRunner:
         self.measure_prefill: bool = False
         self.seed = 42
         self.dtype = torch.float16
+        self.threshold = 150
         
 
         # ---- Logits processors ---------------------------------------
@@ -165,6 +166,7 @@ class InferenceRunner:
                 eos_tokens_id=self.end_tokens,
                 debug=self.debug,
                 use_cache=self.cache,
+                switch_threshold = self.threshold,
             )
             
             new_tok = len(out_ids)
@@ -175,7 +177,7 @@ class InferenceRunner:
             print(colored(f"Drafter usage:", "green"))
             for drafter_name, count in stats['drafter_usage'].items():
                 print(colored(f"  - {drafter_name}: {count} times ({count/sum(stats['drafter_usage'].values())*100:.1f}%)", "green"))
-            # print(colored(self.tokenizer.decode(out_ids, skip_special_tokens=True), "green"))
+            print(colored(self.tokenizer.decode(out_ids, skip_special_tokens=True), "green"))
             
         
         # ==============================================================
@@ -197,7 +199,7 @@ class InferenceRunner:
             )
             tp = len(out_ids) / (time.time() - t0)
             print(colored(f"Throughput: {tp:.1f} tok/s", "blue"))
-            # print(colored(self.tokenizer.decode(out_ids[len(prefix_ids):], skip_special_tokens=True), "blue"))
+            print(colored(self.tokenizer.decode(out_ids[len(prefix_ids):], skip_special_tokens=True), "blue"))
 
         if self.dr:
             for dname, drafter in self.drafters:
@@ -215,7 +217,7 @@ class InferenceRunner:
                 )
                 tp = len(out_ids) / (time.time() - t0)
                 print(colored(f"Throughput: {tp:.1f} tok/s", "cyan"))
-                # print(colored(self.tokenizer.decode(out_ids[len(prefix_ids):], skip_special_tokens=True), "cyan"))
+                print(colored(self.tokenizer.decode(out_ids[len(prefix_ids):], skip_special_tokens=True), "cyan"))
 
         print("\n" + "=" * 48 + "\n")
 
@@ -227,16 +229,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Qwen multi-drafter speculative runner")
 
     # ---- 基本參數 -----------------------------------------------------
-    parser.add_argument("--prompt", type=str, default="給我一些資本主義的創新點子")
-    parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--prompt", type=str, default="what's the weather like today in Taipei? predict it",)
+    # parser.add_argument("--prompt", type=str, default="who's the most beautiful woman around the world",)
+    parser.add_argument("--device", type=str, default="cuda:1")
 
     # ---- drafter 清單 -------------------------------------------------
     parser.add_argument(
         "--drafters",
         type=str,
         # default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-0.6B,Qwen/Qwen3-1.7B, Qwen/Qwen3-4B"),
-        default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-0.6B,Qwen/Qwen3-1.7B"),
-        # default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-1.7B"),
+        # default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-0.6B,Qwen/Qwen3-1.7B"),
+        # default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-4B"),
+        default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-1.7B"),
+        # default=os.getenv("DRAFTER_MODELS", "Qwen/Qwen3-0.6B"),
         help="逗號分隔的 drafter 型號 (亦可用環境變數 DRAFTER_MODELS)",
     )
 
@@ -247,8 +252,9 @@ if __name__ == "__main__":
     parser.add_argument("--chat", action="store_false", help="停用 chat template")
 
     # ---- 生成超參 -----------------------------------------------------
-    parser.add_argument("--gen-len", type=int, default=500)
-    parser.add_argument("--gamma", type=int, default=4)
+    parser.add_argument("--gen-len", type=int, default=180)
+    parser.add_argument("--gamma", type=int, default=2)
+    parser.add_argument("--threshold", type=int, default=150)
 
     # ---- Processor 參數 ---------------------------------------------
     parser.add_argument(
@@ -280,6 +286,7 @@ if __name__ == "__main__":
     runner.target_gen = args.target_gen
     runner.chat = args.chat
     runner.measure_prefill = args.measure_prefill
+    runner.threshold = args.threshold
 
     # ---- 設定 logits processor ---------------------------------------
     proc_cfg = runner.processors[args.processor_name]
