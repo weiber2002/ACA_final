@@ -11,13 +11,9 @@ from termcolor import colored
 # ---- 專案本地模組 ------------------------------------------------------
 # from local_sampling import autoregressive_generate, speculative_generate
 from local_sampling import  autoregressive_generate
-from local_sampling.cascade_speculative_decoding import multi_draft_speculative_generate
+from local_sampling.cascade_speculative_decoding import cascade_speculative_generate
 from utils.logits_processor import (
-    GreedyProcessor,
-    MultinomialProcessor,
-    TopKProcessor,
-    NucleusProcessor,
-    TopKNucleusProcessor,
+    GreedyProcessor
 )
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -51,14 +47,7 @@ class InferenceRunner:
 
         # ---- Logits processors ---------------------------------------
         self.processors = {
-            "greedy": {"processor": GreedyProcessor, "building_args": {"temperature": float}},
-            "multinomial": {"processor": MultinomialProcessor, "building_args": {"temperature": float}},
-            "topk": {"processor": TopKProcessor, "building_args": {"temperature": float, "top_k": int}},
-            "nucleus": {"processor": NucleusProcessor, "building_args": {"temperature": float, "top_p": float}},
-            "topknucleus": {
-                "processor": TopKNucleusProcessor,
-                "building_args": {"temperature": float, "top_k": int, "top_p": float},
-            },
+            "greedy": {"processor": GreedyProcessor, "building_args": {"temperature": float}}
         }
         self.processor = GreedyProcessor()
 
@@ -154,7 +143,7 @@ class InferenceRunner:
             print(colored(f"\n--- Multi-Drafter Speculative Decoding ---", "green"))
             
             t0 = time.time()
-            out_ids, stats = multi_draft_speculative_generate(
+            out_ids, stats = cascade_speculative_generate(
                 prefix_ids,
                 self.drafters,
                 len(self.drafters),
@@ -261,11 +250,9 @@ if __name__ == "__main__":
         "--processor-name",
         type=str,
         default="greedy",
-        choices=["greedy", "multinomial", "topk", "nucleus", "topknucleus"],
+        choices=["greedy", "multinomial", "nucleus", "topknucleus"],
     )
     parser.add_argument("--temperature", type=float, default=1.0)
-    parser.add_argument("--top-k", type=int, default=3)
-    parser.add_argument("--top-p", type=float, default=1.0)
 
     # ---- 預設值 (維持舊行為) -----------------------------------------
     parser.set_defaults(speculative=True, target_gen=True, dr=True, chat=True, measure_prefill=True, cache=False)
@@ -293,10 +280,6 @@ if __name__ == "__main__":
     kwargs = {}
     if "temperature" in proc_cfg["building_args"]:
         kwargs["temperature"] = args.temperature
-    if "top_k" in proc_cfg["building_args"]:
-        kwargs["top_k"] = args.top_k
-    if "top_p" in proc_cfg["building_args"]:
-        kwargs["top_p"] = args.top_p
     runner.processor = proc_cfg["processor"](**kwargs)
     print(colored(f"Processor: {args.processor_name} {kwargs}", "blue"))
 

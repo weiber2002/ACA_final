@@ -13,7 +13,7 @@ def max_fn(x: torch.Tensor) -> torch.Tensor:
     return torch.softmax(x, dim=-1)
 
 @torch.no_grad()
-def multi_draft_speculative_generate(
+def cascade_speculative_generate(
     inputs: List[int],
     drafters: List[Tuple[str, Module]],
     num_drafters: int | None,
@@ -106,7 +106,7 @@ def multi_draft_speculative_generate(
         logits = out_t.logits[0, current_pos-1:current_pos+g-1, :]
 
         p = processor(logits)
-        fractions = torch.clamp(p / (q_buf + 1e-6), max=5.0)  # ⬅️ 修改：避免爆炸性接受
+        fractions = torch.clamp(p / (q_buf + 1e-6), max=10.0)  # ⬅️ 修改：避免爆炸性接受
         r = torch.rand(g, device=device)
         n = g
         for j in range(g):
@@ -118,7 +118,7 @@ def multi_draft_speculative_generate(
         usage_counts[drafter_name] += 1
         drafts_spec += g
         drafts_acc += n
-        print("current_acc_rate:", drafts_acc / drafts_spec if drafts_spec > 0 else 0.0)
+        # print("current_acc_rate:", drafts_acc / drafts_spec if drafts_spec > 0 else 0.0)
 
         input_ids = seq_ids[:1].clone()
 
