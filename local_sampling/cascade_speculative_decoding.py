@@ -122,8 +122,19 @@ def cascade_speculative_generate(
 
         input_ids = seq_ids[:1].clone()
 
+        # if n == g:
+        #     p_next = processor(out_t.logits[0, current_pos+g-1, :])
+        # else:
+        #     target_cache = prune_cache(out_t.past_key_values, n+1)
+        #     if use_cache:
+        #         drafter_cache = prune_cache(drafter_cache, corrected_gamma - n)
+        #         target_cache = prune_cache(target_cache, corrected_gamma - n + 1)
+        #     if skip_sample_adjustment:
+        #         p_next = processor(out_t.logits[0, n, :] - q_buf[0, n , :])
+        #     else:
+        #         p_next = max_fn(out_t.logits[0, n, :])  # ⬅️ 已改為 softmax
         if n == g:
-            target_cache = prune_cache(out_t.past_key_values, g)
+            target_cache = prune_cache(out_t.past_key_values, 0)
             p_next = processor(out_t.logits[0, current_pos+g-1, :])
         else:
             target_cache = prune_cache(out_t.past_key_values, n+1)

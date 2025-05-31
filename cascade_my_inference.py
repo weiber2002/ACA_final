@@ -12,6 +12,7 @@ from termcolor import colored
 # from local_sampling import autoregressive_generate, speculative_generate
 from local_sampling import  autoregressive_generate
 from local_sampling.cascade_speculative_decoding import cascade_speculative_generate
+from local_sampling.speculative_decoding import speculative_generate
 from utils.logits_processor import (
     GreedyProcessor
 )
@@ -143,19 +144,19 @@ class InferenceRunner:
             print(colored(f"\n--- Multi-Drafter Speculative Decoding ---", "green"))
             
             t0 = time.time()
-            out_ids, stats = cascade_speculative_generate(
+            out_ids, stats = speculative_generate(
                 prefix_ids,
                 self.drafters,
-                len(self.drafters),
+                # len(self.drafters),
                 self.target,
                 tokenizer=self.tokenizer,
-                logits_processor=self.processor,
                 gamma=self.gamma,
                 max_gen_len=self.gen_len,
+                logits_processor=self.processor,
                 eos_tokens_id=self.end_tokens,
                 debug=self.debug,
                 use_cache=self.cache,
-                switch_threshold = self.threshold,
+                # switch_threshold = self.threshold,
             )
             
             new_tok = len(out_ids)
@@ -285,3 +286,5 @@ if __name__ == "__main__":
 
     # ---- GO! ----------------------------------------------------------
     runner._infer(args.prompt)
+    
+    
