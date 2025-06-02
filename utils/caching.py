@@ -14,6 +14,9 @@ def prune_cache(cache: Union[Tuple[Tuple[Tensor, Tensor]], DynamicCache], num_to
     Returns:
         Union[Tuple[Tuple[Tensor, Tensor]], DynamicCache]: The pruned KV cache.
     """
+
+    if (num_tokens_to_discard<=0):
+        return cache
     if cache is None:
         return None
     if isinstance(cache, tuple):
