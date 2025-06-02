@@ -3,3 +3,4 @@ from .speculative_decoding import speculative_generate
 from .codec_base_decoding import autoregressive_generate_encoder_decoder
 from .codec_speculative_decoding import speculative_generate_encoder_decoder
 from .cache_speculative_decoding import cache_speculative_generate
+from .speculative_generate_cascade import speculative_generate_cascade
