@@ -53,6 +53,7 @@ class InferenceCLI:
         self.processor = GreedyProcessor()
 
         self._load_models()
+        # self._run()
 
     def _load_models(self):
         # Target model
