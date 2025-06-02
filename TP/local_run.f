@@ -1,1 +1,0 @@
-torchrun  --nproc_per_node=1 LLaMA3_1.py
