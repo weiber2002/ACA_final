@@ -1,0 +1,12 @@
+rank is  0
+world_size is  1
+Please tell me the history of Arsenal. How did they begin?
+The club was formed in 1886 as Dial Square after the gas works in the town of Woolwich. The club was renamed Royal Arsenal in 1888 and finally Arsenal in 1914.
+Arsenal moved to their current stadium in 1913 and are still there today.
+Arsenal were the first club to win the league without losing a game in the 2003-04 season. They are also one of the few clubs to win the league without conceding a goal - this was also in 2003-04.
+Inference time: 2574.241 ms
+Summarization Length =  9
+Generation Length =  114
+Total Length =  123
+Total Throughput is  47.78106566396939
+
