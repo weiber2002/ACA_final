@@ -26,13 +26,15 @@ class InferenceCLI:
         if self.device.type == "cuda":
             torch.cuda.set_device(self.device)
 
-        self.gamma = 4
+        self.gamma = 6
         self.gen_len = 2000
         self.debug = False
         self.spec =  True
         self.dr = True
-        self.cache = True
+        
         self.target_gen = True
+
+        self.cache = True
         
         self.chat = True  # If using a chat instructed model, set to True
         self.past_kv = None
@@ -47,6 +49,7 @@ class InferenceCLI:
         self._load_models()
         self._run()
         print("max gen length is ", self.gen_len)
+        print("self.gamma is ",self.gamma)
 
     def _load_models(self):
         # Target model
@@ -63,7 +66,7 @@ class InferenceCLI:
         # drafter_model = "Qwen/Qwen3-14B-FP8"
         # drafter_model = "Qwen/Qwen3-8B-FP8"
         # drafter_model = "Qwen/Qwen3-4B-FP8"
-        drafter_model = "Qwen/Qwen3-0.6B"
+        drafter_model = "Qwen/Qwen3-8B"
         # drafter_model = "Qwen/Qwen3-0.6B-FP8"
 
         print(colored("Target model:",  on_color="on_yellow"), target_model)
